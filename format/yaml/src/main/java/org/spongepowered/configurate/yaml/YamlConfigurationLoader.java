@@ -345,44 +345,45 @@ public final class YamlConfigurationLoader extends AbstractConfigurationLoader<C
         }
     }
 
-    private final LoaderOptions loader;
-    private final DumperOptions options;
+    private final LoaderOptions loaderOpts;
+    private final DumperOptions dumperOpts;
     private final YamlVisitor visitor;
     private final @Nullable NodeStyle defaultNodeStyle;
 
     private YamlConfigurationLoader(final Builder builder) {
         super(builder, new CommentHandler[] {CommentHandlers.HASH});
 
-        final DumperOptions opts = builder.options;
-        opts.setDefaultFlowStyle(NodeStyle.asSnakeYaml(builder.optionState().value(Builder.NODE_STYLE)));
-        opts.setIndent(builder.optionState().value(Builder.INDENT));
-        opts.setProcessComments(builder.optionState().value(Builder.ENABLE_COMMENTS));
-        opts.setIndentWithIndicator(true);
-        opts.setIndicatorIndent(builder.indent());
-        opts.setWidth(DEFAULT_LINE_LENGTH);
-        this.defaultNodeStyle = builder.nodeStyle();
-        this.options = opts;
-        this.loader = new LoaderOptions()
+        this.loaderOpts = new LoaderOptions()
             .setAcceptTabs(true)
             .setProcessComments(builder.optionState().value(Builder.ENABLE_COMMENTS));
-        this.loader.setCodePointLimit(Integer.MAX_VALUE);
+        this.loaderOpts.setCodePointLimit(Integer.MAX_VALUE);
+
+        this.dumperOpts = builder.options;
+        this.dumperOpts.setDefaultFlowStyle(NodeStyle.asSnakeYaml(builder.optionState().value(Builder.NODE_STYLE)));
+        this.dumperOpts.setIndent(builder.optionState().value(Builder.INDENT));
+        this.dumperOpts.setProcessComments(builder.optionState().value(Builder.ENABLE_COMMENTS));
+        this.dumperOpts.setIndentWithIndicator(true);
+        this.dumperOpts.setIndicatorIndent(builder.indent());
+        this.dumperOpts.setWidth(DEFAULT_LINE_LENGTH);
+        this.defaultNodeStyle = builder.nodeStyle();
+
         this.visitor = new YamlVisitor(true, Yaml11Tags.REPOSITORY);
     }
 
     @Override
     protected void loadInternal(final CommentedConfigurationNode node, final BufferedReader reader) throws ParsingException {
-        final YamlParserComposer parser = new YamlParserComposer(new StreamReader(reader), this.loader, Yaml11Tags.REPOSITORY);
+        final YamlParserComposer parser = new YamlParserComposer(new StreamReader(reader), this.loaderOpts, Yaml11Tags.REPOSITORY);
         parser.singleDocumentStream(node);
     }
 
     @Override
     protected void saveInternal(final ConfigurationNode node, final Writer writer) throws ConfigurateException {
-        final YamlVisitor.State state = new YamlVisitor.State(this.options, writer, this.defaultNodeStyle);
+        final YamlVisitor.State state = new YamlVisitor.State(this.dumperOpts, writer, this.defaultNodeStyle);
         // Initialize
         state.start = node;
         state.emit(YamlVisitor.STREAM_START);
-        state.emit(new DocumentStartEvent(null, null, this.options.isExplicitStart(),
-            this.options.getVersion(), this.options.getTags()));
+        state.emit(new DocumentStartEvent(null, null, this.dumperOpts.isExplicitStart(),
+            this.dumperOpts.getVersion(), this.dumperOpts.getTags()));
 
         // Write out the node
         node.visit(this.visitor, state);
