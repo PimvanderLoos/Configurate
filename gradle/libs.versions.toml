@@ -2,7 +2,7 @@
 assertj="3.27.3"
 autoValue="1.11.0"
 checkerQual="3.49.3"
-checkstyle="10.23.0"
+checkstyle="10.25.0"
 geantyref = "1.3.16"
 groovy = "4.0.15"
 errorprone="2.38.0"
