@@ -126,8 +126,20 @@ public final class YamlConfigurationLoader extends AbstractConfigurationLoader<C
          */
         public static final Option<Integer> INDENT = UNSAFE_SCHEMA.intOption("yaml:indent", 4);
 
+        /**
+         * Whether comments should be enabled on this loader.
+         *
+         * @see #commentsEnabled(boolean)
+         * @since 4.3.0
+         */
         public static final Option<Boolean> ENABLE_COMMENTS = UNSAFE_SCHEMA.booleanOption("yaml:enable_comments", true);
 
+        /**
+         * The maximum length of a line in the emitted YAML document.
+         *
+         * @see #lineLength(int)
+         * @since 4.3.0
+         */
         public static final Option<Integer> LINE_LENGTH = UNSAFE_SCHEMA.intOption("yaml:line_length", 150);
 
         private final DumperOptions options = new DumperOptions();
@@ -284,10 +296,11 @@ public final class YamlConfigurationLoader extends AbstractConfigurationLoader<C
     }
 
     private Yaml newYaml(final ConfigurationNode node) {
-        final YamlConstructor constructor = new YamlConstructor(loaderOpts);
+        final YamlConstructor constructor = new YamlConstructor(this.loaderOpts);
         constructor.options = node.options();
 
-        final Yaml yaml = new Yaml(constructor, new YamlRepresenter(true, dumperOpts), dumperOpts, loaderOpts);
+        final Yaml yaml =
+            new Yaml(constructor, new YamlRepresenter(true, this.dumperOpts), this.dumperOpts, this.loaderOpts);
         return yaml;
     }
 
