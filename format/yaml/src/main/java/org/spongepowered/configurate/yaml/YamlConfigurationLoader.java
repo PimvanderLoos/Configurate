@@ -242,7 +242,7 @@ public final class YamlConfigurationLoader extends AbstractConfigurationLoader<C
          * @since 4.3.0
          */
         public boolean commentsEnabled() {
-            return this.optionStateBuilder().value(NODE_STYLE);
+            return this.optionState().value(ENABLE_COMMENTS);
         }
 
         /**
@@ -267,7 +267,7 @@ public final class YamlConfigurationLoader extends AbstractConfigurationLoader<C
          * @since 4.3.0
          */
         public int lineLength() {
-            return this.optionStateBuilder().value(LINE_LENGTH);
+            return this.optionState().value(LINE_LENGTH);
         }
 
         @Override
