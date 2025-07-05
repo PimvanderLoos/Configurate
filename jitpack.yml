@@ -1,4 +1,5 @@
 before_install:
+  - git submodule update --init --recursive
   - sdk update
   - sdk install java 21-tem
   - sdk default java 21-tem
