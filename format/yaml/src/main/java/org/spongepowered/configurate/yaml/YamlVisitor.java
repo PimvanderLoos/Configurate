@@ -77,10 +77,23 @@ final class YamlVisitor implements ConfigurationVisitor<YamlVisitor.State, Void,
         state.mapKeyHolder = BasicConfigurationNode.root(node.options());
     }
 
+    private @Nullable String getCommentFromNode(final ConfigurationNode node) {
+        final @Nullable String comment = ((CommentedConfigurationNodeIntermediary<? extends @NonNull Object>) node).comment();
+        if (comment == null) {
+            return null;
+        }
+
+        if (comment.length() > 0 && comment.charAt(comment.length() - 1) == '\n') {
+            return comment.substring(0, comment.length() - 1);
+        }
+
+        return comment;
+    }
+
     @Override
     public void enterNode(final ConfigurationNode node, final State state) throws ConfigurateException {
         if (node instanceof CommentedConfigurationNodeIntermediary<?> && state.options.isProcessComments()) {
-            final @Nullable String comment = ((CommentedConfigurationNodeIntermediary<? extends @NonNull Object>) node).comment();
+            final @Nullable String comment = getCommentFromNode(node);
             if (comment != null) {
                 if (this.shouldPadComments && node != state.start) {
                     if (!state.first) {
@@ -93,7 +106,7 @@ final class YamlVisitor implements ConfigurationVisitor<YamlVisitor.State, Void,
                 }
                 for (final String line : COMMENT_SPLIT.split(comment, -1)) {
                     if (line.isEmpty()) {
-                        state.emit(COMMENT_BLANK_LINE);
+                        state.emit(new CommentEvent(CommentType.BLOCK, "", null, null));
                     } else {
                         if (line.codePointAt(0) != '#') { // allow lines that are only the comment character, for box drawing
                             state.emit(new CommentEvent(CommentType.BLOCK, " " + line, null, null));
